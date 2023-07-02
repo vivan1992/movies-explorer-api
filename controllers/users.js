@@ -8,6 +8,13 @@ const ConflictError = require('../errors/ConflictError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
 const ValidationError = require('../errors/ValidationError');
 
+const {
+  wrongCredentialsText,
+  duplicateEmailText,
+  invalidDataText,
+  userIdNotFoundText,
+} = require('../errors/errorsText');
+
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.login = (req, res, next) => {
@@ -16,13 +23,13 @@ module.exports.login = (req, res, next) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new UnauthorizedError('Неправильные почта или пароль'));
+        return Promise.reject(new UnauthorizedError(wrongCredentialsText));
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new UnauthorizedError('Неправильные почта или пароль'));
+            return Promise.reject(new UnauthorizedError(wrongCredentialsText));
           }
 
           const token = jwt.sign(
@@ -80,9 +87,9 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === 11000) {
-        next(new ConflictError('Пользователь с таким email уже зарегистрирован'));
+        next(new ConflictError(duplicateEmailText));
       } else if (err instanceof mongoose.Error.ValidationError) {
-        next(new ValidationError('Переданы некорректные данные при создании пользователя'));
+        next(new ValidationError(invalidDataText));
       } else {
         next(err);
       }
@@ -94,12 +101,12 @@ module.exports.updateUser = (req, res, next) => {
 
   User.findByIdAndUpdate(req.user._id, { email, name }, { new: true, runValidators: true })
     .orFail(() => {
-      throw new NotFoundError('Пользователь по указанному _id не найден.');
+      throw new NotFoundError(userIdNotFoundText);
     })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new ValidationError('Переданы некорректные данные при обновлении профиля'));
+        next(new ValidationError(invalidDataText));
       } else {
         next(err);
       }
@@ -111,7 +118,7 @@ module.exports.getUserMe = (req, res, next) => {
 
   User.findById(_id)
     .orFail(() => {
-      throw new NotFoundError('Пользователь по указанному _id не найден.');
+      throw new NotFoundError(userIdNotFoundText);
     })
     .then((user) => res.send(user))
     .catch(next);

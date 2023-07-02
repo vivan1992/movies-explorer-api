@@ -5,6 +5,12 @@ const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
 const NoRulesError = require('../errors/NoRulesError');
 
+const {
+  invalidDataText,
+  noRulesText,
+  movieIdNotFoundText,
+} = require('../errors/errorsText');
+
 module.exports.createMovie = (req, res, next) => {
   const {
     country,
@@ -37,7 +43,7 @@ module.exports.createMovie = (req, res, next) => {
     .then((movie) => res.status(201).send(movie))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные при создании фильма.'));
+        next(new ValidationError(invalidDataText));
       } else {
         next(err);
       }
@@ -53,18 +59,18 @@ module.exports.getMovie = (req, res, next) => {
 module.exports.deleteMovie = (req, res, next) => {
   Movie.findById(req.params.movieId)
     .orFail(() => {
-      throw new NotFoundError('Фильм с указанным _id не найден.');
+      throw new NotFoundError(movieIdNotFoundText);
     })
     .then((movie) => {
       if (JSON.stringify(movie.owner) !== JSON.stringify(req.user._id)) {
-        throw new NoRulesError('Нет прав на удаление данного фильма');
+        throw new NoRulesError(noRulesText);
       }
       return movie.deleteOne()
         .then(() => res.send(movie));
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        next(new ValidationError('Переданы некорректные данные'));
+        next(new ValidationError(invalidDataText));
       } else {
         next(err);
       }

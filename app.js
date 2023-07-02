@@ -4,24 +4,21 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
-const rateLimit = require('express-rate-limit');
 const { errors } = require('celebrate');
 const { errorHandler } = require('./middlewares/errorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { limiter } = require('./middlewares/limiter');
 
 const corsOptions = {
   origin: ['https://movies.ivan.nomoreparties.sbs', 'http://movies.ivan.nomoreparties.sbs', 'http://localhost:3000'],
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  allowedHeaders: ['Content-Type', 'origin', 'Accept'],
   credentials: true,
 };
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, MONGO_URL, NODE_ENV } = process.env;
 const app = express();
 app.use('*', cors(corsOptions));
 app.use(helmet());
@@ -29,7 +26,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
 
-mongoose.connect('mongodb://127.0.0.1/bitfilmsdb', {
+mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : 'mongodb://localhost:27017/bitfilmsdb', {
   useNewUrlParser: true,
 });
 
