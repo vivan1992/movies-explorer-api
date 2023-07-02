@@ -105,7 +105,9 @@ module.exports.updateUser = (req, res, next) => {
     })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
+      if (err.code === 11000) {
+        next(new ConflictError(duplicateEmailText));
+      } else if (err instanceof mongoose.Error.ValidationError) {
         next(new ValidationError(invalidDataText));
       } else {
         next(err);
