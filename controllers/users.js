@@ -43,10 +43,10 @@ module.exports.login = (req, res, next) => {
               maxAge: 3600000 * 24 * 7,
               httpOnly: true,
               sameSite: 'None',
-              Secure: true,
+              secure: true,
             })
-            .cookie('isLoggedIn', true, { sameSite: 'None', Secure: true })
-            .end();
+            .cookie('isLoggedIn', true, { sameSite: 'None', secure: true })
+            .send({ message: 'Set cooke' });
         });
     })
     .catch(next);
@@ -61,7 +61,7 @@ module.exports.logout = (req, res, next) => {
         sameSite: true,
       })
       .cookie('isLoggedIn', false)
-      .end();
+      .send({ message: 'Delete cooke' });
   } catch (err) {
     return next(err);
   }
