@@ -58,9 +58,10 @@ module.exports.logout = (req, res, next) => {
       .cookie('jwt', 'delete', {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
-        sameSite: true,
+        sameSite: 'None',
+        secure: true,
       })
-      .cookie('isLoggedIn', false)
+      .cookie('isLoggedIn', false, { sameSite: 'None', secure: true })
       .send({ message: 'Delete cooke' });
   } catch (err) {
     return next(err);
