@@ -42,10 +42,9 @@ module.exports.login = (req, res, next) => {
             .cookie('jwt', token, {
               maxAge: 3600000 * 24 * 7,
               httpOnly: true,
-              sameSite: 'None',
-              secure: true,
+              sameSite: true,
             })
-            .cookie('isLoggedIn', true, { sameSite: 'None', secure: true })
+            .cookie('isLoggedIn', true)
             .send({ message: 'Set cooke' });
         });
     })
@@ -58,10 +57,9 @@ module.exports.logout = (req, res, next) => {
       .cookie('jwt', 'delete', {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
-        sameSite: 'None',
-        secure: true,
+        sameSite: true,
       })
-      .cookie('isLoggedIn', false, { sameSite: 'None', secure: true })
+      .cookie('isLoggedIn', false)
       .send({ message: 'Delete cooke' });
   } catch (err) {
     return next(err);
