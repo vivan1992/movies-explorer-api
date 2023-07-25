@@ -44,8 +44,7 @@ module.exports.login = (req, res, next) => {
               httpOnly: true,
               sameSite: true,
             })
-            .cookie('isLoggedIn', true)
-            .send({ message: 'Set cooke' });
+            .send({ isLoggedIn: true });
         });
     })
     .catch(next);
@@ -59,8 +58,7 @@ module.exports.logout = (req, res, next) => {
         httpOnly: true,
         sameSite: true,
       })
-      .cookie('isLoggedIn', false)
-      .send({ message: 'Delete cooke' });
+      .send({ isLoggedIn: false });
   } catch (err) {
     return next(err);
   }
